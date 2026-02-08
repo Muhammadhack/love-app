@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>M + A</title>
+
+<style>
+html,body{
+    margin:0;
+    padding:0;
+    width:100%;
+    height:100%;
+    background:#0f0f14;
+    overflow:hidden;
+    font-family:Arial, sans-serif;
+}
+
+canvas{
+    position:fixed;
+    left:0;
+    top:0;
+    z-index:0;
+}
+
+#title{
+    position:fixed;
+    top:30px;
+    width:100%;
+    text-align:center;
+    font-size:48px;
+    color:#ff4b6e;
+    text-shadow:0 0 15px #ff4b6e;
+    z-index:2;
+}
+
+#heartBtn{
+    position:fixed;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    font-size:110px;
+    cursor:pointer;
+    user-select:none;
+    z-index:5;
+    filter:drop-shadow(0 0 20px #ff4b6e);
+    transition:transform .15s, opacity .3s;
+}
+
+#heartBtn:active{
+    transform:translate(-50%,-50%) scale(0.9);
+}
+
+#text{
+    position:fixed;
+    left:40px;
+    top:35%;
+    max-width:420px;
+    color:#ffd6de;
+    font-size:20px;
+    line-height:1.5;
+    text-shadow:0 0 10px #ff4b6e;
+    opacity:0;
+    transition:opacity 1.2s;
+    z-index:3;
+}
+
+#timer{
+    position:fixed;
+    bottom:20px;
+    width:100%;
+    text-align:center;
+    color:#ffb6c5;
+    font-size:18px;
+    text-shadow:0 0 8px #ff4b6e;
+    opacity:0;
+    transition:opacity 1.2s;
+    z-index:3;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="c"></canvas>
+
+<div id="title">M + A</div>
+
+<div id="text">
+Моя любовь, с тобой каждый день становится особенным.<br>
+Твоя улыбка — мой любимый свет.<br>
+Спасибо тебе за твоё тепло и за наш общий мир.<br><br>
+— Я люблю тебя ❤️
+</div>
+
+<div id="timer"></div>
+
+<div id="heartBtn">❤️</div>
+
+<script>
+const canvas = document.getElementById("c");
+const ctx = canvas.getContext("2d");
+
+function resize(){
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
+}
+resize();
+addEventListener("resize",resize);
+
+let hearts = [];
+let started = false;
+
+const heartBtn = document.getElementById("heartBtn");
+const text = document.getElementById("text");
+const timerEl = document.getElementById("timer");
+
+heartBtn.addEventListener("click",()=>{
+    if(started) return;
+
+    started = true;
+    spawn(60);
+
+    heartBtn.style.opacity = "0.3";
+    text.style.opacity = "1";
+    timerEl.style.opacity = "1";
+});
+
+function spawn(count){
+    for(let i=0;i<count;i++){
+        hearts.push({
+            x: innerWidth/2,
+            y: innerHeight/2,
+            vx:(Math.random()-0.5)*4,
+            vy:-Math.random()*4-1,
+            size: 14 + Math.random()*10,
+            life:1
+        });
+    }
+}
+
+function drawHeart(x,y,s){
+    ctx.save();
+    ctx.translate(x,y);
+    ctx.scale(s/20,s/20);
+    ctx.beginPath();
+    ctx.moveTo(0,3);
+    ctx.bezierCurveTo(-10,-7,-20,5,0,20);
+    ctx.bezierCurveTo(20,5,10,-7,0,3);
+    ctx.closePath();
+    ctx.fillStyle="#ff4b6e";
+    ctx.shadowColor="#ff4b6e";
+    ctx.shadowBlur=10;
+    ctx.fill();
+    ctx.restore();
+}
+
+function loop(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    if(started){
+        if(Math.random()<0.35){
+            spawn(3);
+        }
+    }
+
+    hearts.forEach(h=>{
+        h.x+=h.vx;
+        h.y+=h.vy;
+        h.vy+=0.05;
+        h.life-=0.006;
+        drawHeart(h.x,h.y,h.size);
+    });
+
+    hearts = hearts.filter(h=>h.life>0);
+
+    requestAnimationFrame(loop);
+}
+
+loop();
+
+/* таймер отношений */
+const startDate = new Date("2024-01-01T00:00:00"); // ← поменяй дату
+
+function updateTimer(){
+    const now = new Date();
+    let diff = Math.floor((now - startDate)/1000);
+
+    const days = Math.floor(diff/86400);
+    diff%=86400;
+    const hours = Math.floor(diff/3600);
+    diff%=3600;
+    const minutes = Math.floor(diff/60);
+    const seconds = diff%60;
+
+    timerEl.textContent =
+        days+" дней "
+        +hours+" часов "
+        +minutes+" минут "
+        +seconds+" секунд вместе ❤️";
+}
+
+setInterval(updateTimer,1000);
+updateTimer();
+</script>
+</body>
+</html>
